@@ -12,6 +12,9 @@ bsm<-function(s, seasonal="HarrisonStevens", tdgroups=c(1,2,3,4,5,6,0), fixedtd=
   add(m, jd3_ssf_td("td", frequency(s), start(s), length(s), tdgroups
                       , variance = if(fixedtd)0 else 1, fixed=fixedtd))
   add(m, jd3_ssf_noise("n"))
+  #z<-rnorm(3*length(s))
+  #x<-matrix(z, nrow=length(s), ncol=3)
+  #add(m, jd3_ssf_reg("x", x, .1, F))
   #add(m, jd3_ssf_cycle("n"))
   # create the equation 
   eq<-jd3_ssf_equation("eq")
@@ -19,6 +22,7 @@ bsm<-function(s, seasonal="HarrisonStevens", tdgroups=c(1,2,3,4,5,6,0), fixedtd=
   add(eq, "s")
   add(eq, "td")
   add(eq, "n")
+  #add(eq, "x")
   add(m, eq)
   #estimate the model
   rslt<-estimate(m, s, marginal=F, concentrated=T)
