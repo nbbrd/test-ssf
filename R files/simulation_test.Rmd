@@ -25,12 +25,12 @@ jd_bsm<-function(x, nar=0){
   # create the model
   bsm<-jd3_ssf_model()
   # create the components and add them to the model
-  add(bsm, jd3_ssf_locallineartrend("ll"))
-  add(bsm, jd3_ssf_seasonal("s", 12, type="Dummy"))
+  ssf.add(bsm, jd3_ssf_locallineartrend("ll"))
+  ssf.add(bsm, jd3_ssf_seasonal("s", 12, type="Dummy"))
   if (nar == 1){
-    add(bsm, jd3_ssf_sae("n", .5, lag=3))
+    ssf.add(bsm, jd3_ssf_sae("n", .5, lag=3))
   }else if (nar == 2){
-    add(bsm, jd3_ssf_sae("n", c(.3, .2), lag=3))
+    ssf.add(bsm, jd3_ssf_sae("n", c(.3, .2), lag=3))
   }
   # create the equation 
   if (nar == 0){
@@ -38,14 +38,14 @@ jd_bsm<-function(x, nar=0){
   }else{
     eq<-jd3_ssf_equation("eq")
   }
-  add(eq, "ll")
-  add(eq, "s")
+  ssf.add(eq, "ll")
+  ssf.add(eq, "s")
   if (nar >0){
-    add(eq, "n")
+    ssf.add(eq, "n")
   }
-  add(bsm, eq)
+  ssf.add(bsm, eq)
   #estimate the model
-  rslt<-estimate(bsm, x, marginal=F, concentrated=T, precision=1e-9)
+  rslt<-ssf.estimate(bsm, x, precision=1e-9)
 }
 
 kfas_bsm <- function(x,init_val,optim_method="BFGS"){
@@ -172,21 +172,21 @@ jd_sae_only<-function(x, ar=c(rho.2,rho.3,rho.4,rho.5),v=v_tv){
   
   # create the equations 
   eq1<-jd3_ssf_equation("eq1", 0, T)
-  add(eq1, "sae", loading=jd3_ssf_loading(0))
-  add(ons,eq1)
+  ssf.add(eq1, "sae", loading=jd3_ssf_loading(0))
+  ssf.add(ons,eq1)
   eq2<-jd3_ssf_equation("eq2", 0, T)
-  add(eq2, "sae", loading=jd3_ssf_loading(1))
-  add(ons,eq2)
+  ssf.add(eq2, "sae", loading=jd3_ssf_loading(1))
+  ssf.add(ons,eq2)
   eq3<-jd3_ssf_equation("eq3", 0, T)
-  add(eq3, "sae", loading=jd3_ssf_loading(2))
-  add(ons, eq3)
+  ssf.add(eq3, "sae", loading=jd3_ssf_loading(2))
+  ssf.add(ons, eq3)
   eq4<-jd3_ssf_equation("eq4", 0, T)
-  add(eq4, "sae", loading=jd3_ssf_loading(3))
-  add(ons, eq4)
+  ssf.add(eq4, "sae", loading=jd3_ssf_loading(3))
+  ssf.add(ons, eq4)
   eq5<-jd3_ssf_equation("eq5", 0, T)
-  add(eq5, "sae", loading=jd3_ssf_loading(4))
-  add(ons, eq5)
-  return (estimate(ons, x, marginal=F, concentrated=T, precision=1e-9))
+  ssf.add(eq5, "sae", loading=jd3_ssf_loading(4))
+  ssf.add(ons, eq5)
+  return (ssf.estimate(ons, x, precision=1e-9))
 }
 
    

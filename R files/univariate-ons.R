@@ -5,23 +5,23 @@ ons_bsm<-function(x, nar=0){
   # create the model
   bsm<-jd3_ssf_model()
   # create the components and add them to the model
-  add(bsm, jd3_ssf_locallineartrend("ll"))
-  add(bsm, jd3_ssf_seasonal("s", 12, type="Dummy"))
+  ssf.add(bsm, jd3_ssf_locallineartrend("ll"))
+  ssf.add(bsm, jd3_ssf_seasonal("s", 12, type="Dummy"))
   if (nar == 0){
-    add(bsm, jd3_ssf_noise("n"))
+    ssf.add(bsm, jd3_ssf_noise("n"))
   }else if (nar == 1){
-    add(bsm, jd3_ssf_sae("n", .5, lag=3))
+    ssf.add(bsm, jd3_ssf_sae("n", .5, lag=3))
   }else{
-    add(bsm, jd3_ssf_sae("n", c(.3, .2), lag=3))
+    ssf.add(bsm, jd3_ssf_sae("n", c(.3, .2), lag=3))
   }
   # create the equation 
   eq<-jd3_ssf_equation("eq")
-  add(eq, "ll")
-  add(eq, "s")
-  add(eq, "n", .01, fixed=F)
-  add(bsm, eq)
+  ssf.add(eq, "ll")
+  ssf.add(eq, "s")
+  ssf.add(eq, "n", .01, fixed=F)
+  ssf.add(bsm, eq)
   #estimate the model
-  rslt<-estimate(bsm, x, marginal=F, concentrated=T)
+  rslt<-ssf.estimate(bsm, x, optimizer="BFGS", concentrated=F)
 }
 
 print_ons_bsm<-function(rslt, nar=0){

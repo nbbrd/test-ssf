@@ -24,37 +24,37 @@ bsm_sae<-function(y, ar, uvar, seasonal="Trigonometric", noise=T){
   
   # create the components and add them to the model
   # trend component
-  add(bsm, jd3_ssf_locallineartrend("ll"))
+  ssf.add(bsm, jd3_ssf_locallineartrend("ll"))
   
   # seasonal component. Several specifcations available
-  add(bsm, jd3_ssf_seasonal("s", 12, type=seasonal))
+  ssf.add(bsm, jd3_ssf_seasonal("s", 12, type=seasonal))
   
   #noise
   if (noise)
-    add(bsm, jd3_ssf_noise("n"))
+    ssf.add(bsm, jd3_ssf_noise("n"))
   
   #sample error
   if (length(uvar) == 1){
-    add(bsm, jd3_ssf_ar("u", ar, fixedar = T, variance = 1, fixedvariance = T))
+    ssf.add(bsm, jd3_ssf_ar("u", ar, fixedar = T, variance = 1, fixedvariance = T))
   }else{
-    add(bsm, jd3_ssf_ar("u", ar, fixedar = T, variance = 1, fixedvariance = T))
+    ssf.add(bsm, jd3_ssf_ar("u", ar, fixedar = T, variance = 1, fixedvariance = T))
   }
   # create the equation (no measurement error)
   eq<-jd3_ssf_equation("eq")
   
-  add(eq, "ll")
-  add(eq, "s")
+  ssf.add(eq, "ll")
+  ssf.add(eq, "s")
   if (noise){
-    add(eq, "n")
+    ssf.add(eq, "n")
   }
   if (length(uvar) == 1){
-    add(eq, "u", sqrt(uvar), T)
+    ssf.add(eq, "u", sqrt(uvar), T)
   }else{
-    add(eq, "u", loading=jd3_ssf_varloading(0, sqrt(uvar)))
+    ssf.add(eq, "u", loading=jd3_ssf_varloading(0, sqrt(uvar)))
   }
-  add(bsm, eq)
+  ssf.add(bsm, eq)
   
-  return (estimate(bsm, y, concentrated=F))
+  return (ssf.estimate(bsm, y, optimizer="BFGS", marginal=T, concentrated=F))
 }
 
 printsae<-function(rslt, uvar, filtering=T){

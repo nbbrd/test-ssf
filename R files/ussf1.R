@@ -7,25 +7,25 @@ load("./Data/ABS.rda")
 bsm<-function(s, seasonal="HarrisonStevens", tdgroups=c(1,2,3,4,5,6,0), fixedtd=F){  # create the model
   # create the components and add them to the model
   m<-jd3_ssf_model()
-  add(m, jd3_ssf_locallineartrend("ll"))
-  add(m, jd3_ssf_seasonal("s", frequency(s), type=seasonal))
-  add(m, jd3_ssf_td("td", frequency(s), start(s), length(s), tdgroups
+  ssf.add(m, jd3_ssf_locallineartrend("ll"))
+  ssf.add(m, jd3_ssf_seasonal("s", frequency(s), type=seasonal))
+  ssf.add(m, jd3_ssf_td("td", frequency(s), start(s), length(s), tdgroups
                       , variance = if(fixedtd)0 else 1, fixed=fixedtd))
-  add(m, jd3_ssf_noise("n"))
+  ssf.add(m, jd3_ssf_noise("n"))
   #z<-rnorm(3*length(s))
   #x<-matrix(z, nrow=length(s), ncol=3)
-  #add(m, jd3_ssf_reg("x", x, .1, F))
-  #add(m, jd3_ssf_cycle("n"))
+  #ssf.add(m, jd3_ssf_reg("x", x, .1, F))
+  #ssf.add(m, jd3_ssf_cycle("n"))
   # create the equation 
   eq<-jd3_ssf_equation("eq")
-  add(eq, "ll")
-  add(eq, "s")
-  add(eq, "td")
-  add(eq, "n")
-  #add(eq, "x")
-  add(m, eq)
+  ssf.add(eq, "ll")
+  ssf.add(eq, "s")
+  ssf.add(eq, "td")
+  ssf.add(eq, "n")
+  #ssf.add(eq, "x")
+  ssf.add(m, eq)
   #estimate the model
-  rslt<-estimate(m, s, marginal=F, concentrated=T)
+  rslt<-ssf.estimate(m, s, concentrated=T)
   return (rslt)
 }
 
@@ -65,15 +65,15 @@ airline<-function(s, period, tdgroups=c(1,2,3,4,5,6,0)){
   # create the model
   airline<-jd3_ssf_model()
   # create the components and add them to the model
-  add(airline, jd3_ssf_sarima("air", frequency(s), c(0,1,1), c(0,1,1)) )
-  add(airline, jd3_ssf_td("td", frequency(s), start(s), length(s), tdgroups))
+  ssf.add(airline, jd3_ssf_sarima("air", frequency(s), c(0,1,1), c(0,1,1)) )
+  ssf.add(airline, jd3_ssf_td("td", frequency(s), start(s), length(s), tdgroups))
   # create the equation (fix the variance to 0)
   eq<-jd3_ssf_equation("eq", 0, TRUE)
-  add(eq, "air")
-  add(eq, "td")
-  add(airline, eq)
+  ssf.add(eq, "air")
+  ssf.add(eq, "td")
+  ssf.add(airline, eq)
   #estimate the model
-  rslt<-estimate(airline, s, marginal=T, concentrated=T)
+  rslt<-estimate(airline, s, concentrated=T)
   return(rslt)
 }
 

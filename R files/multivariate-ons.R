@@ -6,86 +6,86 @@ ons_msae<-function(x, ar=.7, e=NULL){
   
   # create the common components and add them to the model
   # trend component
-  add(ons, jd3_ssf_locallineartrend("ll"))
+  ssf.add(ons, jd3_ssf_locallineartrend("ll"))
   # or, for a smooth trend: 
-  # add(bsm, jd3_ssf_locallineartrend("ll", levelVariance = 0, fixedLevelVariance = TRUE))
+  # ssf.add(bsm, jd3_ssf_locallineartrend("ll", levelVariance = 0, fixedLevelVariance = TRUE))
   
   # seasonal component. Several specifcations available
-  add(ons, jd3_ssf_seasonal("s", 12, type="Dummy"))
+  ssf.add(ons, jd3_ssf_seasonal("s", 12, type="Dummy"))
 
   # bias corrections (we use specific local levels)
-  add(ons, jd3_ssf_locallevel("b2", variance = 0))
-  add(ons, jd3_ssf_locallevel("b3", variance = 0))
-  add(ons, jd3_ssf_locallevel("b4", variance = 0))
-  add(ons, jd3_ssf_locallevel("b5", variance = 0))
+  ssf.add(ons, jd3_ssf_locallevel("b2", variance = 0))
+  ssf.add(ons, jd3_ssf_locallevel("b3", variance = 0))
+  ssf.add(ons, jd3_ssf_locallevel("b4", variance = 0))
+  ssf.add(ons, jd3_ssf_locallevel("b5", variance = 0))
   
   # multivariate survey errors 
   # 5 waves, ar(1) models, given r2...r5 (fixed here to .22... 25), lag = 3
   mar<-matrix(ar, nrow = 1, ncol=4)
-  add(ons, jd3_ssf_msae("sae", nwaves=5, ar=mar, fixedar = TRUE, lag=3))
+  ssf.add(ons, jd3_ssf_msae("sae", nwaves=5, ar=mar, fixedar = TRUE, lag=3))
   
   # survey errors (set to 1.x for wave x + some noise)
   
   # create the equations 
   eq1<-jd3_ssf_equation("eq1")
-  add(eq1, "ll")
-  add(eq1, "s")
-  add(eq1, "b2", -1)
-  add(eq1, "b3", -1)
-  add(eq1, "b4", -1)
-  add(eq1, "b5", -1)
+  ssf.add(eq1, "ll")
+  ssf.add(eq1, "s")
+  ssf.add(eq1, "b2", -1)
+  ssf.add(eq1, "b3", -1)
+  ssf.add(eq1, "b4", -1)
+  ssf.add(eq1, "b5", -1)
   if (is.null(e)){
-    add(eq1, "sae", .1, fixed=F, jd3_ssf_loading(0))
+    ssf.add(eq1, "sae", .1, fixed=F, jd3_ssf_loading(0))
   }else{
-    add(eq1, "sae", .1, fixed=F, loading=jd3_ssf_varloading(0, e[,1]))
+    ssf.add(eq1, "sae", .1, fixed=F, loading=jd3_ssf_varloading(0, e[,1]))
   }
-  add(ons, eq1)
+  ssf.add(ons, eq1)
   
   eq2<-jd3_ssf_equation("eq2")
-  add(eq2, "ll")
-  add(eq2, "s")
-  add(eq2, "b2")
+  ssf.add(eq2, "ll")
+  ssf.add(eq2, "s")
+  ssf.add(eq2, "b2")
   if (is.null(e)){
-    add(eq2, "sae", .1, fixed=F, jd3_ssf_loading(1))
+    ssf.add(eq2, "sae", .1, fixed=F, jd3_ssf_loading(1))
   }else{
-    add(eq2, "sae", .1, fixed=F, loading=jd3_ssf_varloading(1, e[,2]))
+    ssf.add(eq2, "sae", .1, fixed=F, loading=jd3_ssf_varloading(1, e[,2]))
   }
-  add(ons, eq2)
+  ssf.add(ons, eq2)
   
   eq3<-jd3_ssf_equation("eq3")
-  add(eq3, "ll")
-  add(eq3, "s")
-  add(eq3, "b3")
+  ssf.add(eq3, "ll")
+  ssf.add(eq3, "s")
+  ssf.add(eq3, "b3")
   if (is.null(e)){
-    add(eq3, "sae", .1, fixed=F, jd3_ssf_loading(2))
+    ssf.add(eq3, "sae", .1, fixed=F, jd3_ssf_loading(2))
   }else{
-    add(eq3, "sae", .1, fixed=F, loading=jd3_ssf_varloading(2, e[,3]))
+    ssf.add(eq3, "sae", .1, fixed=F, loading=jd3_ssf_varloading(2, e[,3]))
   }
-  add(ons, eq3)
+  ssf.add(ons, eq3)
   
   eq4<-jd3_ssf_equation("eq4")
-  add(eq4, "ll")
-  add(eq4, "s")
-  add(eq4, "b4")
+  ssf.add(eq4, "ll")
+  ssf.add(eq4, "s")
+  ssf.add(eq4, "b4")
   if (is.null(e)){
-    add(eq4, "sae", .1, fixed=F, jd3_ssf_loading(3))
+    ssf.add(eq4, "sae", .1, fixed=F, jd3_ssf_loading(3))
   }else{
-    add(eq4, "sae", .1, fixed=F, loading=jd3_ssf_varloading(3, e[,4]))
+    ssf.add(eq4, "sae", .1, fixed=F, loading=jd3_ssf_varloading(3, e[,4]))
   }
-  add(ons, eq4)
+  ssf.add(ons, eq4)
   
   eq5<-jd3_ssf_equation("eq5")
-  add(eq5, "ll")
-  add(eq5, "s")
-  add(eq5, "b5")
+  ssf.add(eq5, "ll")
+  ssf.add(eq5, "s")
+  ssf.add(eq5, "b5")
   if (is.null(e)){
-    add(eq5, "sae", .1, fixed=F, jd3_ssf_loading(4))
+    ssf.add(eq5, "sae", .1, fixed=F, jd3_ssf_loading(4))
   }else{
-    add(eq5, "sae", .1, fixed=F, loading=jd3_ssf_varloading(4, e[,5]))
+    ssf.add(eq5, "sae", .1, fixed=F, loading=jd3_ssf_varloading(4, e[,5]))
   }
-  add(ons, eq5)
+  ssf.add(ons, eq5)
   
-  return (estimate(ons, x, marginal=T, concentrated=T))
+  return (ssf.estimate(ons, x, marginal=T, concentrated=T))
 }
 
 ons_msae2<-function(x, ar=.7){
@@ -94,61 +94,61 @@ ons_msae2<-function(x, ar=.7){
   
   # create the common components and add them to the model
   # trend component
-  add(ons2, jd3_ssf_locallineartrend("l"))
+  ssf.add(ons2, jd3_ssf_locallineartrend("l"))
   # seasonal component. Several specifcations available
-  add(ons2, jd3_ssf_seasonal("s", 12, type="Dummy"))
+  ssf.add(ons2, jd3_ssf_seasonal("s", 12, type="Dummy"))
   # bias corrections (we use specific local levels)
-  add(ons2, jd3_ssf_locallevel("b2"))
-  add(ons2, jd3_ssf_locallevel("b3"))
-  add(ons2, jd3_ssf_locallevel("b4"))
-  add(ons2, jd3_ssf_locallevel("b5"))
+  ssf.add(ons2, jd3_ssf_locallevel("b2"))
+  ssf.add(ons2, jd3_ssf_locallevel("b3"))
+  ssf.add(ons2, jd3_ssf_locallevel("b4"))
+  ssf.add(ons2, jd3_ssf_locallevel("b5"))
   # multivariate survey errors 
   # 5 waves
   mar<-matrix(ar, nrow = 1, ncol=4)
-  add(ons2, jd3_ssf_msae2("sae", vars=array(0, 5), fixedvars=F, ar=mar, fixedar = TRUE, lag=3))
+  ssf.add(ons2, jd3_ssf_msae2("sae", vars=array(0, 5), fixedvars=F, ar=mar, fixedar = TRUE, lag=3))
   
   # survey errors (set to 1.x for wave x + some noise)
   
   # create the equations 
   eq1<-jd3_ssf_equation("eq1")
-  add(eq1, "l")
-  add(eq1, "s")
-  add(eq1, "b2", -1)
-  add(eq1, "b3", -1)
-  add(eq1, "b4", -1)
-  add(eq1, "b5", -1)
-  add(eq1, "sae", loading=jd3_ssf_loading(0))
-  add(ons2, eq1)
+  ssf.add(eq1, "l")
+  ssf.add(eq1, "s")
+  ssf.add(eq1, "b2", -1)
+  ssf.add(eq1, "b3", -1)
+  ssf.add(eq1, "b4", -1)
+  ssf.add(eq1, "b5", -1)
+  ssf.add(eq1, "sae", loading=jd3_ssf_loading(0))
+  ssf.add(ons2, eq1)
   
   eq2<-jd3_ssf_equation("eq2")
-  add(eq2, "l")
-  add(eq2, "s")
-  add(eq2, "b2")
-  add(eq2, "sae", loading=jd3_ssf_loading(1))
-  add(ons2, eq2)
+  ssf.add(eq2, "l")
+  ssf.add(eq2, "s")
+  ssf.add(eq2, "b2")
+  ssf.add(eq2, "sae", loading=jd3_ssf_loading(1))
+  ssf.add(ons2, eq2)
   
   eq3<-jd3_ssf_equation("eq3")
-  add(eq3, "l")
-  add(eq3, "s")
-  add(eq3, "b3")
-  add(eq3, "sae", loading=jd3_ssf_loading(2))
-  add(ons2, eq3)
+  ssf.add(eq3, "l")
+  ssf.add(eq3, "s")
+  ssf.add(eq3, "b3")
+  ssf.add(eq3, "sae", loading=jd3_ssf_loading(2))
+  ssf.add(ons2, eq3)
   
   eq4<-jd3_ssf_equation("eq4")
-  add(eq4, "l")
-  add(eq4, "s")
-  add(eq4, "b4")
-  add(eq4, "sae", loading=jd3_ssf_loading(3))
-  add(ons2, eq4)
+  ssf.add(eq4, "l")
+  ssf.add(eq4, "s")
+  ssf.add(eq4, "b4")
+  ssf.add(eq4, "sae", loading=jd3_ssf_loading(3))
+  ssf.add(ons2, eq4)
   
   eq5<-jd3_ssf_equation("eq5")
-  add(eq5, "l")
-  add(eq5, "s")
-  add(eq5, "b5")
-  add(eq5, "sae", loading=jd3_ssf_loading(4))
-  add(ons2, eq5)
+  ssf.add(eq5, "l")
+  ssf.add(eq5, "s")
+  ssf.add(eq5, "b5")
+  ssf.add(eq5, "sae", loading=jd3_ssf_loading(4))
+  ssf.add(ons2, eq5)
   
-  return (estimate(ons2, x, marginal=T, concentrated=T))
+  return (estimate(ons2, x, marginal=T))
 }
 
 
