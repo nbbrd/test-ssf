@@ -6,26 +6,26 @@ load("./Data/ABS.rda")
 # Usual BSM with time varying trading days
 bsm<-function(s, seasonal="HarrisonStevens", tdgroups=c(1,2,3,4,5,6,0), fixedtd=F){  # create the model
   # create the components and add them to the model
-  m<-jd3_ssf_model()
-  ssf.add(m, jd3_ssf_locallineartrend("ll"))
-  ssf.add(m, jd3_ssf_seasonal("s", frequency(s), type=seasonal))
-  ssf.add(m, jd3_ssf_td("td", frequency(s), start(s), length(s), tdgroups
+  m<-rjdssf::model()
+  rjdssf::add(m, rjdssf::locallineartrend("ll"))
+  rjdssf::add(m, rjdssf::seasonal("s", frequency(s), type=seasonal))
+  rjdssf::add(m, rjdssf::td("td", frequency(s), start(s), length(s), tdgroups
                       , variance = if(fixedtd)0 else 1, fixed=fixedtd))
-  ssf.add(m, jd3_ssf_noise("n"))
+  rjdssf::add(m, rjdssf::noise("n"))
   #z<-rnorm(3*length(s))
   #x<-matrix(z, nrow=length(s), ncol=3)
   #ssf.add(m, jd3_ssf_reg("x", x, .1, F))
   #ssf.add(m, jd3_ssf_cycle("n"))
   # create the equation 
-  eq<-jd3_ssf_equation("eq")
-  ssf.add(eq, "ll")
-  ssf.add(eq, "s")
-  ssf.add(eq, "td")
-  ssf.add(eq, "n")
+  eq<-rjdssf::equation("eq")
+  rjdssf::add(eq, "ll")
+  rjdssf::add(eq, "s")
+  rjdssf::add(eq, "td")
+  rjdssf::add(eq, "n")
   #ssf.add(eq, "x")
-  ssf.add(m, eq)
+  rjdssf::add(m, eq)
   #estimate the model
-  rslt<-ssf.estimate(m, s, concentrated=T)
+  rslt<-rjdssf::estimate(m, s, concentrated=T)
   return (rslt)
 }
 
@@ -50,8 +50,8 @@ rslt<-bsm(s, tdgroups=c(1,1,1,1,2,3,0))
 
 printbsm(rslt)
 
-ss<-jd3_smoothedstates(rslt)
-fs<-jd3_filteredstates(rslt)
+ss<-rjdssf::smoothedstates(rslt)
+fs<-rjdssf::filteredstates(rslt)
 
 plot(fs[,1], type="l")
 lines(ss[,1], col="red")
@@ -63,17 +63,17 @@ lines(ss[,16], col="red")
 # Usual airline with time varying trading days
 airline<-function(s, period, tdgroups=c(1,2,3,4,5,6,0)){
   # create the model
-  airline<-jd3_ssf_model()
+  airline<-rjdssf::model()
   # create the components and add them to the model
-  ssf.add(airline, jd3_ssf_sarima("air", frequency(s), c(0,1,1), c(0,1,1)) )
-  ssf.add(airline, jd3_ssf_td("td", frequency(s), start(s), length(s), tdgroups))
+  rjdssf::add(airline, rjdssf::sarima("air", frequency(s), c(0,1,1), c(0,1,1)) )
+  rjdssf::add(airline, rjdssf::td("td", frequency(s), start(s), length(s), tdgroups))
   # create the equation (fix the variance to 0)
-  eq<-jd3_ssf_equation("eq", 0, TRUE)
-  ssf.add(eq, "air")
-  ssf.add(eq, "td")
-  ssf.add(airline, eq)
+  eq<-rjdssf::equation("eq", 0, TRUE)
+  rjdssf::add(eq, "air")
+  rjdssf::add(eq, "td")
+  rjdssf::add(airline, eq)
   #estimate the model
-  rslt<-estimate(airline, s, concentrated=T)
+  rslt<-rjdssf::estimate(airline, s, concentrated=T)
   return(rslt)
 }
 
@@ -94,8 +94,8 @@ arslt<-airline(s, tdgroups=c(1,1,1,1,2,3,0))
 
 printairline(arslt)
 
-ass<-jd3_smoothedstates(arslt)
-afs<-jd3_filteredstates(arslt)
+ass<-rjdssf::smoothedstates(arslt)
+afs<-rjdssf::filteredstates(arslt)
 
 plot(-ass[,15]*4-ass[,16]-ass[,17], type="l")
 lines(-afs[,15]*4-afs[,16]-afs[,17], col="red")

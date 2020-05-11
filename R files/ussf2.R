@@ -4,28 +4,28 @@ load("./Data/retail.rda")
 
 # create the model
 bsm_td_periodic<-function(s, tdgroups, noisyperiod, contrast = F){
-  bsm<-jd3_ssf_model()
+  bsm<-rjdssf::model()
   
   # create the components and add them to the model
-  ssf.add(bsm, jd3_ssf_locallineartrend("ll"))
-  ssf.add(bsm, jd3_ssf_seasonal("s", frequency(s), type="Crude"))
-  ssf.add(bsm, jd3_ssf_td("td", frequency(s), start(s), length(s), tdgroups, contrast, variance = 0, fixed=T))
-  ssf.add(bsm, jd3_ssf_noise("n"))
+  rjdssf::add(bsm, rjdssf::locallineartrend("ll"))
+  rjdssf::add(bsm, rjdssf::seasonal("s", frequency(s), type="Crude"))
+  rjdssf::add(bsm, rjdssf::td("td", frequency(s), start(s), length(s), tdgroups, contrast, variance = 0, fixed=T))
+  rjdssf::add(bsm, rjdssf::noise("n"))
   for (i in 1:length(noisyperiod)){
-    ssf.add(bsm, jd3_ssf_noise(paste("pn", i, sep=""), variance = .01, fixed=F))
+    rjdssf::add(bsm, rjdssf::noise(paste("pn", i, sep=""), variance = .01, fixed=F))
   }
   # create the equation (fix the variance to 1)
-  eq<-jd3_ssf_equation("eq")
-  ssf.add(eq, "ll")
-  ssf.add(eq, "s")
-  ssf.add(eq, "td")
-  ssf.add(eq, "n")
+  eq<-rjdssf::equation("eq")
+  rjdssf::add(eq, "ll")
+  rjdssf::add(eq, "s")
+  rjdssf::add(eq, "td")
+  rjdssf::add(eq, "n")
   for (i in 1:length(noisyperiod)){
-    ssf.add(eq,paste("pn", i, sep=""), 1, TRUE, jd3_ssf_loading_periodic(frequency(s), noisyperiod[i]))
+    rjdssf::add(eq,paste("pn", i, sep=""), 1, TRUE, rjdssf::loading_periodic(frequency(s), noisyperiod[i]))
   }
-  ssf.add(bsm, eq)
+  rjdssf::add(bsm, eq)
   #estimate the model
-  rslt<-ssf.estimate(bsm, s, marginal=T, concentrated=T)
+  rslt<-rjdssf::estimate(bsm, s, marginal=T, concentrated=T)
   return(rslt)
 }
 

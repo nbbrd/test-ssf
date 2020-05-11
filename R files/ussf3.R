@@ -5,17 +5,17 @@ load("./Data/ABS.rda")
 
 bsm0<-function(s, seasonal="Dummy"){
   # create the model
-  bsm<-jd3_ssf_model()
+  bsm<-rjdssf::model()
   # create the components and add them to the model
-  ssf.add(bsm, jd3_ssf_locallineartrend("ll"))
-  ssf.add(bsm, jd3_ssf_seasonal("s", frequency(s), type=seasonal))
+  rjdssf::add(bsm, rjdssf::locallineartrend("ll"))
+  rjdssf::add(bsm, rjdssf::seasonal("s", frequency(s), type=seasonal))
   # create the equation 
-  eq<-jd3_ssf_equation("eq", 0, F)
-  ssf.add(eq, "ll")
-  ssf.add(eq, "s")
-  ssf.add(bsm, eq)
+  eq<-rjdssf::equation("eq", 0, F)
+  rjdssf::add(eq, "ll")
+  rjdssf::add(eq, "s")
+  rjdssf::add(bsm, eq)
   #estimate the model
-  rslt<-ssf.estimate(bsm, s, concentrated=T)
+  rslt<-rjdssf::estimate(bsm, s, concentrated=T)
   return (rslt)
 }
 
