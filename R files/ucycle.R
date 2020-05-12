@@ -19,22 +19,22 @@ tsprod<-ts(prod, frequency = 12, start = c(1967,1))
 
 bsm.cycle<-function(s, seasonal="HarrisonStevens", tdgroups=c(1,2,3,4,5,6,0), fixedtd=F, cycle.length=84, cycle.fixed=T){  # create the model
   # create the components and add them to the model
-  m<-jd3_ssf_model()
-  ssf.add(m, jd3_ssf_locallineartrend("ll", levelVariance = 0, fixedLevelVariance = T))
-  ssf.add(m, jd3_ssf_cycle("c", period=cycle.length, fixed = cycle.fixed))
-  ssf.add(m, jd3_ssf_seasonal("s", frequency(s), type=seasonal))
-  ssf.add(m, jd3_ssf_td("td", frequency(s), start(s), length(s), tdgroups
+  m<-rjdssf::model()
+  rjdssf::add(m, rjdssf::locallineartrend("ll", levelVariance = 0, fixedLevelVariance = T))
+  rjdssf::add(m, rjdssf::cycle("c", period=cycle.length, fixed = cycle.fixed))
+  rjdssf::add(m, rjdssf::seasonal("s", frequency(s), type=seasonal))
+  rjdssf::add(m, rjdssf::td("td", frequency(s), start(s), length(s), tdgroups
                         , variance = if(fixedtd)0 else 1, fixed=fixedtd))
-  ssf.add(m, jd3_ssf_noise("n"))
-  eq<-jd3_ssf_equation("eq")
-  ssf.add(eq, "ll")
-  ssf.add(eq, "c")
-  ssf.add(eq, "s")
-  ssf.add(eq, "td")
-  ssf.add(eq, "n")
-  ssf.add(m, eq)
+  rjdssf::add(m, rjdssf::noise("n"))
+  eq<-rjdssf::equation("eq")
+  rjdssf::add(eq, "ll")
+  rjdssf::add(eq, "c")
+  rjdssf::add(eq, "s")
+  rjdssf::add(eq, "td")
+  rjdssf::add(eq, "n")
+  rjdssf::add(m, eq)
   #estimate the model
-  rslt<-ssf.estimate(m, s, concentrated=T)
+  rslt<-rjdssf::estimate(m, s, concentrated=T)
   return (rslt)
 }
 

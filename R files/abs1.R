@@ -20,46 +20,46 @@ emp_sig<-read.csv("./Data/abs_emp_sig2.csv")
 # seasonal =seasonal model, noise component in the structural model
 bsm_sae<-function(y, ar, uvar, seasonal="Trigonometric", noise=T){
   # create the model
-  bsm<-jd3_ssf_model()
+  bsm<-rjdssf::model()
   
   # create the components and add them to the model
   # trend component
-  ssf.add(bsm, jd3_ssf_locallineartrend("ll"))
+  rjdssf::add(bsm, rjdssf::locallineartrend("ll"))
   
   # seasonal component. Several specifcations available
-  ssf.add(bsm, jd3_ssf_seasonal("s", 12, type=seasonal))
+  rjdssf::add(bsm, rjdssf::seasonal("s", 12, type=seasonal))
   
   #noise
   if (noise)
-    ssf.add(bsm, jd3_ssf_noise("n"))
+    rjdssf::add(bsm, rjdssf::noise("n"))
   
   #sample error
   if (length(uvar) == 1){
-    ssf.add(bsm, jd3_ssf_ar("u", ar, fixedar = T, variance = 1, fixedvariance = T))
+    rjdssf::add(bsm, rjdssf::ar("u", ar, fixedar = T, variance = 1, fixedvariance = T))
   }else{
-    ssf.add(bsm, jd3_ssf_ar("u", ar, fixedar = T, variance = 1, fixedvariance = T))
+    rjdssf::add(bsm, rjdssf::ar("u", ar, fixedar = T, variance = 1, fixedvariance = T))
   }
   # create the equation (no measurement error)
-  eq<-jd3_ssf_equation("eq")
+  eq<-rjdssf::equation("eq")
   
-  ssf.add(eq, "ll")
-  ssf.add(eq, "s")
+  rjdssf::add(eq, "ll")
+  rjdssf::add(eq, "s")
   if (noise){
-    ssf.add(eq, "n")
+    rjdssf::add(eq, "n")
   }
   if (length(uvar) == 1){
-    ssf.add(eq, "u", sqrt(uvar), T)
+    rjdssf::add(eq, "u", sqrt(uvar), T)
   }else{
-    ssf.add(eq, "u", loading=jd3_ssf_varloading(0, sqrt(uvar)))
+    rjdssf::add(eq, "u", loading=rjdssf::varloading(0, sqrt(uvar)))
   }
-  ssf.add(bsm, eq)
+  rjdssf::add(bsm, eq)
   
-  return (ssf.estimate(bsm, y, optimizer="BFGS", marginal=T, concentrated=F))
+  return (rjdssf::estimate(bsm, y, optimizer="BFGS", marginal=T, concentrated=F))
 }
 
 printsae<-function(rslt, uvar, filtering=T){
   p<-result(rslt, "parameters")
-  ll<-result(rslt, "loglikelihood")
+  ll<-result(rslt, "likelihood.ll")
   cat("\nloglikelihood =", ll, "\n\n")
   cat("variances:\n")
   cat("level: ", p[1], "\n")
@@ -91,7 +91,7 @@ plotsae<-function(rslt, uvar, filtering=T){
 
 
 # Survey variances (corrected for ar coefficients)
-# if you want to you uncorrected survey variances, you should you jd3_ssf_sae instead of jd3_ssf_ar in the function bsm_sae
+# if you want to you uncorrected survey variances, you should you rjdssf::sae instead of rjdssf::ar in the function bsm_sae
 # (the correction is then automatically computed, which could allow direct (poor) estimation of the AR coefficients)
 uvar<-un_sig[,13]
 s<-log(un[,163])

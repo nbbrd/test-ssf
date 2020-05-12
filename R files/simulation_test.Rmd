@@ -23,29 +23,29 @@ library(rjdssf)
 
 jd_bsm<-function(x, nar=0){
   # create the model
-  bsm<-jd3_ssf_model()
+  bsm<-rjdssf::model()
   # create the components and add them to the model
-  ssf.add(bsm, jd3_ssf_locallineartrend("ll"))
-  ssf.add(bsm, jd3_ssf_seasonal("s", 12, type="Dummy"))
+  rjdssf::add(bsm, rjdssf::locallineartrend("ll"))
+  rjdssf::add(bsm, rjdssf::seasonal("s", 12, type="Dummy"))
   if (nar == 1){
-    ssf.add(bsm, jd3_ssf_sae("n", .5, lag=3))
+    rjdssf::add(bsm, rjdssf::sae("n", .5, lag=3))
   }else if (nar == 2){
-    ssf.add(bsm, jd3_ssf_sae("n", c(.3, .2), lag=3))
+    rjdssf::add(bsm, rjdssf::sae("n", c(.3, .2), lag=3))
   }
   # create the equation 
   if (nar == 0){
-    eq<-jd3_ssf_equation("eq", .01, F)
+    eq<-rjdssf::equation("eq", .01, F)
   }else{
-    eq<-jd3_ssf_equation("eq")
+    eq<-rjdssf::equation("eq")
   }
-  ssf.add(eq, "ll")
-  ssf.add(eq, "s")
+  rjdssf::add(eq, "ll")
+  rjdssf::add(eq, "s")
   if (nar >0){
-    ssf.add(eq, "n")
+    rjdssf::add(eq, "n")
   }
-  ssf.add(bsm, eq)
+  rjdssf::add(bsm, eq)
   #estimate the model
-  rslt<-ssf.estimate(bsm, x, precision=1e-9)
+  rslt<-rjdssf::estimate(bsm, x, precision=1e-9)
 }
 
 kfas_bsm <- function(x,init_val,optim_method="BFGS"){
@@ -88,7 +88,7 @@ for(i in 1:n){
    jd_dur <- jd_end-jd_start
    s <- result(q, "scalingfactor") 
    p<-result(q, "parameters")
-   jd_estimate <- rbind(jd_estimate,as.numeric(c(jd_dur,-1*result(q,"loglikelihood"),s*p[c(1:3)],s*p[length(p)]*p[length(p)])))
+   jd_estimate <- rbind(jd_estimate,as.numeric(c(jd_dur,-1*result(q,"likelihood.ll"),s*p[c(1:3)],s*p[length(p)]*p[length(p)])))
    kfas_start <- Sys.time()
    r <- kfas_bsm(sim,init_val)
    kfas_end <- Sys.time()
@@ -162,31 +162,31 @@ v_tv <- matrix(1,1,5)
 
 jd_sae_only<-function(x, ar=c(rho.2,rho.3,rho.4,rho.5),v=v_tv){
   # create the model
-  ons<-jd3_ssf_model()
+  ons<-rjdssf::model()
   
   # multivariate survey errors 
   # 5 waves, ar(1) models, given r2...r5 (fixed here to .22... 25), lag = 3
-  add(ons, jd3_ssf_msae3("sae",array(0.01, 5), F, ar=ar, fixedar = T, v, lag=3))
+  add(ons, rjdssf::msae3("sae",array(0.01, 5), F, ar=ar, fixedar = T, v, lag=3))
   
   # survey errors (set to 1.x for wave x + some noise)
   
   # create the equations 
-  eq1<-jd3_ssf_equation("eq1", 0, T)
-  ssf.add(eq1, "sae", loading=jd3_ssf_loading(0))
-  ssf.add(ons,eq1)
-  eq2<-jd3_ssf_equation("eq2", 0, T)
-  ssf.add(eq2, "sae", loading=jd3_ssf_loading(1))
-  ssf.add(ons,eq2)
-  eq3<-jd3_ssf_equation("eq3", 0, T)
-  ssf.add(eq3, "sae", loading=jd3_ssf_loading(2))
-  ssf.add(ons, eq3)
-  eq4<-jd3_ssf_equation("eq4", 0, T)
-  ssf.add(eq4, "sae", loading=jd3_ssf_loading(3))
-  ssf.add(ons, eq4)
-  eq5<-jd3_ssf_equation("eq5", 0, T)
-  ssf.add(eq5, "sae", loading=jd3_ssf_loading(4))
-  ssf.add(ons, eq5)
-  return (ssf.estimate(ons, x, precision=1e-9))
+  eq1<-rjdssf::equation("eq1", 0, T)
+  rjdssf::add(eq1, "sae", loading=rjdssf::loading(0))
+  rjdssf::add(ons,eq1)
+  eq2<-rjdssf::equation("eq2", 0, T)
+  rjdssf::add(eq2, "sae", loading=rjdssf::loading(1))
+  rjdssf::add(ons,eq2)
+  eq3<-rjdssf::equation("eq3", 0, T)
+  rjdssf::add(eq3, "sae", loading=rjdssf::loading(2))
+  rjdssf::add(ons, eq3)
+  eq4<-rjdssf::equation("eq4", 0, T)
+  rjdssf::add(eq4, "sae", loading=rjdssf::loading(3))
+  rjdssf::add(ons, eq4)
+  eq5<-rjdssf::equation("eq5", 0, T)
+  rjdssf::add(eq5, "sae", loading=rjdssf::loading(4))
+  rjdssf::add(ons, eq5)
+  return (rjdssf::estimate(ons, x, precision=1e-9))
 }
 
    
@@ -234,7 +234,7 @@ for(i in 1:n){
    jd_dur <- jd_end-jd_start
    s <- result(q, "scalingfactor") 
    p<-result(q, "parameters")
-   jd_estimate <- rbind(jd_estimate,as.numeric(c(jd_dur,-1*result(q,"loglikelihood"),s*p[c(1:5)])))
+   jd_estimate <- rbind(jd_estimate,as.numeric(c(jd_dur,-1*result(q,"likelihood.ll"),s*p[c(1:5)])))
    kfas_start <- Sys.time()
    r <- kfas_sae(sim,init_val)
    kfas_end <- Sys.time()
@@ -288,7 +288,7 @@ for(i in 1:n){
    jd_dur <- jd_end-jd_start
    s <- result(q, "scalingfactor") 
    p<-result(q, "parameters")
-   jd_estimate <- rbind(jd_estimate,as.numeric(c(jd_dur,result(q,"loglikelihood"),s*p[c(1:3)],s*p[length(p)]*p[length(p)])))
+   jd_estimate <- rbind(jd_estimate,as.numeric(c(jd_dur,result(q,"likelihood.ll"),s*p[c(1:3)],s*p[length(p)]*p[length(p)])))
    kfas_start <- Sys.time()
    r <- kfas_bsm(y,init_val)
    kfas_end <- Sys.time()

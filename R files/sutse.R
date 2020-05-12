@@ -2,7 +2,8 @@ library(rjdssf)
 load("./Data/retail.rda")
 a<-read.csv("./Data/abs1.csv")
 
-sutse<-function(st, concentrated = TRUE){
+sutse<-function(st, optimizer=c("LevenbergMarquardt", "MinPack", "BFGS")){
+  optimizer=match.arg(optimizer)
   if (! inherits(st, "ts") || ! inherits(st, "matrix"))  
     stop(st, " is not a ts matrix")
   if (dim(st)[2]!= 2)
@@ -40,22 +41,22 @@ sutse<-function(st, concentrated = TRUE){
   rjdssf::add(eq2, "n2")
   rjdssf::add(eq2, "n1", 0, F)
   rjdssf::add(model, eq2)
-  rslt<-rjdssf::estimate(model, cbind(s,t), marginal=F, initialization="SqrtDiffuse", optimizer="MinPack", concentrated=concentrated, precision=1e-15)
+  rslt<-rjdssf::estimate(model, cbind(s,t), marginal=F, initialization="SqrtDiffuse", optimizer="MinPack", concentrated=T, precision=1e-15)
   
   p<-result(rslt, "parameters")
-  s<-result(rslt, "scalingfactor")
+  factor<-result(rslt, "scalingfactor")
   cl<-p[11]
   csl<-p[12]
   cs<-p[13]
   cn<-p[14]
   names<-c("level", "slope", "seasonal", "noise")
   
-  variable1<-data.frame(variance=c(s*p[1],s*p[3], s*p[4], s*p[5]), 
+  variable1<-data.frame(variance=c(factor*p[1],factor*p[3], factor*p[4], factor*p[5]), 
                         row.names = names)
-  variable2<-data.frame(variance=c(s*(p[1]*cl*cl+p[6]),
-                                   s*(p[3]*csl*csl+p[8]),  
-                                   s*(p[4]*cs*cs+p[9]),
-                                   s*(p[5]*cn*cn+p[10])), 
+  variable2<-data.frame(variance=c(factor*(p[1]*cl*cl+p[6]),
+                                   factor*(p[3]*csl*csl+p[8]),  
+                                   factor*(p[4]*cs*cs+p[9]),
+                                   factor*(p[5]*cn*cn+p[10])), 
                         row.names = names)
 
   if (p[1]==0){
@@ -90,9 +91,9 @@ sutse<-function(st, concentrated = TRUE){
                         row.names = names)
   
   specification<-list(
-         concentrated=concentrated,
+         concentrated=T,
          marginal=T,
-         optimizer="MinPack",
+         optimizer=optimizer,
          initialization="SqrtDiffuse")
   models<-list(
     variable1=variable1,
@@ -108,11 +109,13 @@ sutse<-function(st, concentrated = TRUE){
   
   sm<-rjdssf::smoothedstates(rslt)
   decomposition1<-list(
+    series=s,
     level=ts(sm[,1]+sm[,2], frequency = freq, start = start),
     seas=ts(sm[,4], frequency = freq, start = start),
     noise=ts(sm[,15], frequency = freq, start = start)
   )
   decomposition2<-list(
+    series=t,
     level=ts(sm[,1]*cl+sm[,2]*csl+sm[,16]+sm[,17], frequency = freq, start = start),
     seas=ts(sm[,4]*cs+sm[,19], frequency = freq, start = start),
     noise=ts(sm[,15]*cn+sm[,30], frequency = freq, start = start)
@@ -128,11 +131,44 @@ sutse<-function(st, concentrated = TRUE){
   , class="JD3SUTSE"))
 }
 
+plot.JD3SUTSE<-function(sutse){
+  if (! inherits(sutse, "JD3SUTSE"))
+    stop(sutse, " should be of class JD3SUTSE")
+  par(mfrow=c(2,2))
+  d<-sutse$estimation$decomposition1
+  ts.plot(ts.union(d$series, d$series-d$seas, d$level), col=c("gray", "blue", "red"))
+  ts.plot(ts.union(d$seas, d$noise), col=c("magenta", "green"))
+  d<-sutse$estimation$decomposition2
+  ts.plot(ts.union(d$series, d$series-d$seas, d$level), col=c("gray", "blue", "red"))
+  ts.plot(ts.union(d$seas, d$noise), col=c("magenta", "green"))
+  
+  par(las=0)
+}
 
+logLik.JD3SUTSE<-function(sutse){
+  if (! inherits(sutse, "JD3SUTSE"))
+    stop(sutse, " should be of class JD3SUTSE")
+  return (sutse$likelihood$loglikelihood)
+}
+
+print.JD3SUTSE<-function(sutse){
+  if (! inherits(sutse, "JD3SUTSE"))
+    stop(sutse, " should be of class JD3SUTSE")
+  cat("SUTSE model\n\n")
+  cat("Max likelihood = ", sutse$likelihood$loglikelihood, "\n\n")
+  cat("Variances of series 1\n\n")
+  print(sutse$model$variable1)
+  cat("\n\nVariances of series 2\n\n")
+  print(sutse$model$variable2)
+  cat("\n\nCorrelations between innovations of the two series\n")
+  print(sutse$model$correlations)
+}
 
 c1=153
 c2=c1+5
 #c3=c1+10
 
 #q<-sutse(a[,c1], a[,c2], T)
-q<-sutse(ts.union(log(retail$BookStores), log(retail$BuildingMatAndGardenEquipAndSupp)), T)
+q<-sutse(ts.union(log(retail$BookStores), log(retail$BuildingMatAndGardenEquipAndSupp)))
+print(q)
+plot(q)
