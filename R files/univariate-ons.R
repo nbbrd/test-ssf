@@ -3,25 +3,25 @@ library(rjdssf)
 #simple bsm (dummy seasonal)
 ons_bsm<-function(x, nar=0){
   # create the model
-  bsm<-jd3_ssf_model()
+  bsm<-rjdssf::model()
   # create the components and add them to the model
-  add(bsm, jd3_ssf_locallineartrend("ll"))
-  add(bsm, jd3_ssf_seasonal("s", 12, type="Dummy"))
+  rjdssf::add(bsm, rjdssf::locallineartrend("ll"))
+  rjdssf::add(bsm, rjdssf::seasonal("s", 12, type="Dummy"))
   if (nar == 0){
-    add(bsm, jd3_ssf_noise("n"))
+    rjdssf::add(bsm, rjdssf::noise("n"))
   }else if (nar == 1){
-    add(bsm, jd3_ssf_sae("n", .5, lag=3))
+    rjdssf::add(bsm, rjdssf::sae("n", .5, lag=3))
   }else{
-    add(bsm, jd3_ssf_sae("n", c(.3, .2), lag=3))
+    rjdssf::add(bsm, rjdssf::sae("n", c(.3, .2), lag=3))
   }
   # create the equation 
-  eq<-jd3_ssf_equation("eq")
-  add(eq, "ll")
-  add(eq, "s")
-  add(eq, "n", .01, fixed=F)
-  add(bsm, eq)
+  eq<-rjdssf::equation("eq")
+  rjdssf::add(eq, "ll")
+  rjdssf::add(eq, "s")
+  rjdssf::add(eq, "n", .01, fixed=F)
+  rjdssf::add(bsm, eq)
   #estimate the model
-  rslt<-estimate(bsm, x, marginal=F, concentrated=T)
+  rslt<-rjdssf::estimate(bsm, x, optimizer="BFGS", concentrated=F)
 }
 
 print_ons_bsm<-function(rslt, nar=0){
@@ -42,8 +42,8 @@ print_ons_bsm<-function(rslt, nar=0){
 
 
 plot_ons_bsm<-function(rslt){
-  ss<-jd3_smoothedstates(rslt)
-  fs<-jd3_filteredstates(rslt)
+  ss<-rjdssf::smoothedstates(rslt)
+  fs<-rjdssf::filteredstates(rslt)
   
   
   plot(fs[,1], type="l")

@@ -5,37 +5,37 @@ load("./Data/ABS.rda")
 
 s<-ABS$X0.2.09.10.M
 # create the model
-bsm<-jd3_ssf_model()
+bsm<-rjdssf::model()
 
 # create the components and add them to the model
 # trend component
-add(bsm, jd3_ssf_locallineartrend("ll"))
+rjdssf::add(bsm, rjdssf::locallineartrend("ll"))
 # or, for a smooth trend: 
-# add(bsm, jd3_ssf_locallineartrend("ll", levelVariance = 0, fixedLevelVariance = TRUE))
+# rjdssf::add(bsm, rjdssf::locallineartrend("ll", levelVariance = 0, fixedLevelVariance = TRUE))
 
 # seasonal component. Several specifcations available
-add(bsm, jd3_ssf_seasonal("s", 12, type="Dummy"))
-# for instance: add(bsm, jd3_ssf_seasonal("s", 12, type="Trigonometric"))
+rjdssf::add(bsm, rjdssf::seasonal("s", 12, type="Dummy"))
+# for instance: rjdssf::add(bsm, rjdssf::seasonal("s", 12, type="Trigonometric"))
 # or my preferred one (trivial extensions to seasonal specific components)
-# add(bsm, jd3_ssf_seasonal("s", 12, type="HarrisonStevens"))
+# rjdssf::add(bsm, rjdssf::seasonal("s", 12, type="HarrisonStevens"))
 
 #sample error
-add(bsm, jd3_ssf_sae("n", c(.3), lag=3))
+rjdssf::add(bsm, rjdssf::sae("n", c(.3), lag=3))
 # AR(3,6) with fixed parameters
-# add(bsm, jd3_ssf_sae("n", c(.3, -2), fixedar=TRUE, lag=3))
+# rjdssf::add(bsm, rjdssf::sae("n", c(.3, -2), fixedar=TRUE, lag=3))
 
 # Survey std error
 f<-10+runif(n=length(s), min = 0, max=10)
 
 # create the equation (fix the variance to 0)
-eq<-jd3_ssf_equation("eq", 0, TRUE)
-add(eq, "ll")
-add(eq, "s")
-add(eq, "n", loading= jd3_ssf_varloading(0, f))
-add(bsm, eq)
+eq<-rjdssf::equation("eq", 0, TRUE)
+rjdssf::add(eq, "ll")
+rjdssf::add(eq, "s")
+rjdssf::add(eq, "n", loading= rjdssf::varloading(0, f))
+rjdssf::add(bsm, eq)
 
-rslt<-estimate(bsm, s, concentrated=FALSE)
-print(result(rslt, "loglikelihood"))
+rslt<-rjdssf::estimate(bsm, s, concentrated=FALSE)
+print(result(rslt, "likelihood.ll"))
 print(result(rslt, "parameters"))
 
 print(result(rslt, "ssf.cmppos"))
